@@ -1,0 +1,11 @@
+[project]
+name = "bookmark-summarizer"
+version = "1.0.0"
+description = "Daily AI-powered digest of your X/Twitter bookmarks via Telegram"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.42.0",
+    "python-telegram-bot>=22.0",
+    "jinja2>=3.1",
+    "python-dotenv>=1.0",
+]

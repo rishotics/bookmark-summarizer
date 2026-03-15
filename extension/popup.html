@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 300px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      background: #15202b;
+      color: #e7e9ea;
+    }
+    h2 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: #1d9bf0;
+    }
+    .stat {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      margin: 12px 0;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #8b98a5;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .last-info {
+      font-size: 11px;
+      color: #8b98a5;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: #1d9bf0;
+      color: white;
+    }
+    .btn-primary:hover { background: #1a8cd8; }
+    .btn-primary:disabled {
+      background: #1d4e7a;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #273340;
+      color: #e7e9ea;
+    }
+    .btn-secondary:hover { background: #2e3d4d; }
+    .btn-danger {
+      background: transparent;
+      color: #f4212e;
+      border: 1px solid #67070f;
+    }
+    .btn-danger:hover { background: #1c0a0e; }
+    .status {
+      font-size: 11px;
+      color: #1d9bf0;
+      text-align: center;
+      margin-top: 8px;
+      min-height: 16px;
+    }
+    .status.error { color: #f4212e; }
+    .divider {
+      border: none;
+      border-top: 1px solid #2f3336;
+      margin: 12px 0;
+    }
+    .config-section {
+      display: none;
+    }
+    .config-section.visible {
+      display: block;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      color: #8b98a5;
+      margin-bottom: 4px;
+      margin-top: 8px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #2f3336;
+      border-radius: 8px;
+      background: #273340;
+      color: #e7e9ea;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #1d9bf0;
+    }
+  </style>
+</head>
+<body>
+  <h2>X Bookmark Summarizer</h2>
+  <div class="stat" id="count">0</div>
+  <div class="stat-label">bookmarks captured</div>
+  <div class="last-info" id="lastInfo"></div>
+
+  <button class="btn-primary" id="sendBtn">Send Digest Now</button>
+  <button class="btn-secondary" id="configToggle">Settings</button>
+
+  <div class="config-section" id="configSection">
+    <hr class="divider">
+    <label>Anthropic API Key</label>
+    <input type="password" id="apiKey" placeholder="sk-ant-...">
+    <label>Telegram Bot Token</label>
+    <input type="password" id="botToken" placeholder="123456:ABC-DEF...">
+    <label>Telegram Chat ID</label>
+    <input type="text" id="chatId" placeholder="your_chat_id">
+    <br><br>
+    <button class="btn-primary" id="saveConfig">Save Settings</button>
+  </div>
+
+  <hr class="divider">
+  <button class="btn-danger" id="clearBtn">Clear All Bookmarks</button>
+  <div class="status" id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
