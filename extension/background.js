@@ -97,19 +97,38 @@ async function storeBookmarks(newBookmarks) {
 
 // --- Alarms ---
 
-chrome.alarms.create("dailyDigest", {
-  periodInMinutes: 24 * 60,
-  delayInMinutes: 1,
-});
+// Set up alarms on install and on Chrome startup
+chrome.runtime.onInstalled.addListener(setupAlarms);
+chrome.runtime.onStartup.addListener(setupAlarms);
 
-// Auto-refresh bookmarks tab every 6 hours to capture new bookmarks
-chrome.alarms.create("refreshBookmarks", {
-  periodInMinutes: 6 * 60,
-  delayInMinutes: 10,
-});
+function setupAlarms() {
+  chrome.alarms.create("dailyDigest", {
+    periodInMinutes: 24 * 60,
+    delayInMinutes: 1,
+  });
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+  // Auto-refresh bookmarks tab every 24 hours to capture new bookmarks
+  chrome.alarms.create("refreshBookmarks", {
+    periodInMinutes: 24 * 60,
+    delayInMinutes: 5,
+  });
+
+  console.log("XBS: Alarms set up — digest every 24h, refresh every 24h");
+}
+
+// Also set them up immediately in case service worker restarts
+setupAlarms();
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  console.log(`XBS: Alarm fired: ${alarm.name}`);
   if (alarm.name === "dailyDigest") {
+    // Refresh bookmarks tab first, wait for it to load, then send digest
+    const refreshed = await refreshBookmarksTab();
+    if (refreshed) {
+      // Wait 30 seconds for the page to load and bookmarks to be captured
+      console.log("XBS: Waiting 30s for bookmarks to load after refresh...");
+      await new Promise((r) => setTimeout(r, 30000));
+    }
     runDigestPipeline();
   }
   if (alarm.name === "refreshBookmarks") {
@@ -120,9 +139,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 async function refreshBookmarksTab() {
   const tabs = await chrome.tabs.query({ url: "*://x.com/i/bookmarks*" });
   if (tabs.length > 0) {
-    // Refresh the existing bookmarks tab
-    console.log("XBS: Auto-refreshing bookmarks tab");
+    console.log(`XBS: Auto-refreshing bookmarks tab (pinned: ${tabs[0].pinned})`);
     chrome.tabs.reload(tabs[0].id);
+    return true;
+  } else {
+    console.log("XBS: No bookmarks tab open to refresh");
+    return false;
   }
 }
 

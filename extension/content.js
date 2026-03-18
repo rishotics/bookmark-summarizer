@@ -54,18 +54,26 @@ function extractTweet(entry) {
 
     const tweetData = result.__typename === "Tweet" ? result : result.tweet || result;
     const legacy = tweetData?.legacy;
-    const core = tweetData?.core?.user_results?.result?.legacy;
+    // Handle multiple possible paths for user data
+    const core =
+      tweetData?.core?.user_results?.result?.legacy ||
+      tweetData?.core?.user_result?.result?.legacy ||
+      tweetData?.author?.legacy;
 
-    if (!legacy || !core) return null;
+    if (!legacy) return null;
 
     const mediaUrls = (legacy.entities?.media || []).map((m) => m.media_url_https);
 
+    const authorName = core?.name || "Unknown";
+    const authorHandle = core?.screen_name || "unknown";
+    const tweetId = legacy.id_str || tweetData.rest_id;
+
     return {
-      tweet_id: legacy.id_str || tweetData.rest_id,
-      author: core.name,
-      author_handle: core.screen_name,
+      tweet_id: tweetId,
+      author: authorName,
+      author_handle: authorHandle,
       text: legacy.full_text,
-      url: `https://x.com/${core.screen_name}/status/${legacy.id_str || tweetData.rest_id}`,
+      url: `https://x.com/${authorHandle}/status/${tweetId}`,
       created_at: legacy.created_at,
       likes: legacy.favorite_count || 0,
       retweets: legacy.retweet_count || 0,
