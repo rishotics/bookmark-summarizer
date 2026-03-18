@@ -6,12 +6,11 @@
   "permissions": [
     "storage",
     "alarms",
-    "tabs"
+    "tabs",
+    "downloads"
   ],
   "host_permissions": [
-    "*://x.com/*",
-    "https://api.anthropic.com/*",
-    "https://api.telegram.org/*"
+    "*://x.com/*"
   ],
   "background": {
     "service_worker": "background.js"

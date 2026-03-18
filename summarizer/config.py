@@ -6,13 +6,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 @dataclass
 class Config:
     anthropic_api_key: str
     telegram_bot_token: str
     telegram_chat_id: str
+    mongodb_uri: str
     bookmarks_path: Path
-    state_path: Path
 
 
 def load_config() -> Config:
@@ -20,6 +21,6 @@ def load_config() -> Config:
         anthropic_api_key=os.environ["ANTHROPIC_API_KEY"],
         telegram_bot_token=os.environ["TELEGRAM_BOT_TOKEN"],
         telegram_chat_id=os.environ["TELEGRAM_CHAT_ID"],
-        bookmarks_path=Path(os.getenv("BOOKMARKS_PATH", "./data/bookmarks_raw.json")),
-        state_path=Path(os.getenv("STATE_PATH", "./data/state.json")),
+        mongodb_uri=os.environ["MONGODB_URI"],
+        bookmarks_path=Path(os.getenv("BOOKMARKS_PATH", "~/Downloads/bookmark-summarizer/bookmarks_raw.json")).expanduser(),
     )

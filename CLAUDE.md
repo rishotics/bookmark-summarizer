@@ -4,41 +4,61 @@ Chrome extension that captures X/Twitter bookmarks and sends daily AI-powered di
 
 ## Architecture
 
-Everything runs inside the Chrome extension — no backend server needed.
-
 ```
-User leaves x.com/i/bookmarks tab open
+User leaves x.com/i/bookmarks tab pinned in Arc
   → Extension intercepts GraphQL responses (XHR monkey-patching via MAIN world content script)
   → Stores bookmarks in chrome.storage.local
+  → Auto-exports to ~/Downloads/bookmark-summarizer/bookmarks_raw.json
   → Every 6 hours: auto-refreshes bookmarks tab to capture new ones
-  → Every 24 hours: sends digest to Telegram
-    → Filters to last 48 hours, unprocessed only
+  → Daily at 6 AM IST: Python cron runs the digest pipeline
+    → Reads exported JSON, upserts ALL bookmarks into MongoDB
+    → Filters to last 24 hours, unprocessed only
     → Calls Claude API (Sonnet) to rank, filter, group, and summarize
-    → Sends formatted Markdown to Telegram Bot
+    → Stores summaries in MongoDB for search
+    → Finds 1 related past bookmark from MongoDB
+    → Sends formatted Markdown digest to Telegram Bot
 ```
 
 ## Key Files
 
 - `extension/intercept.js` — Runs in MAIN world, monkey-patches `fetch` and `XMLHttpRequest` to intercept X's GraphQL bookmark responses
 - `extension/content.js` — Runs in extension world, receives intercepted data via `postMessage`, extracts tweet data, relays to background
-- `extension/background.js` — Service worker: stores bookmarks, runs digest pipeline (Claude API → Telegram), manages alarms for auto-refresh and daily digest
-- `extension/popup.html/js` — UI: shows bookmark count, Send Digest Now button, settings for API keys
+- `extension/background.js` — Service worker: stores bookmarks, auto-exports to JSON, manages alarms for tab refresh
+- `extension/popup.html/js` — UI: shows bookmark count, Export Now button
+- `summarizer/main.py` — Pipeline orchestrator: read JSON → MongoDB → summarize → find related → Telegram
+- `summarizer/mongo_store.py` — MongoDB operations: upsert, query last 24h, text search for related past bookmarks
+- `summarizer/summarize.py` — Claude API calls for summarization and related bookmark selection
+- `summarizer/deliver.py` — Telegram delivery with Markdown formatting
 
 ## Configuration
 
-API keys are stored in `chrome.storage.local` via the extension popup Settings panel:
-- Anthropic API Key
-- Telegram Bot Token
-- Telegram Chat ID
+Extension popup: no config needed (capture only).
+
+Python `.env` file:
+- `ANTHROPIC_API_KEY` — Claude API key
+- `TELEGRAM_BOT_TOKEN` — Telegram bot token
+- `TELEGRAM_CHAT_ID` — Your personal Telegram chat ID
+- `MONGODB_URI` — MongoDB Atlas connection string
+- `BOOKMARKS_PATH` — Path to exported bookmarks JSON
+
+## MongoDB Schema
+
+Database: `bookmark_summarizer`, Collection: `bookmarks`
+
+Fields: `tweet_id` (unique), `author`, `author_handle`, `text`, `url`, `created_at`, `likes`, `retweets`, `media_urls`, `bookmarked_at`, `summary`, `themes`, `importance`, `processed`, `processed_at`
+
+Indexes: unique on `tweet_id`, text index on `summary + text + themes`
 
 ## Development
 
-Load as unpacked extension: `chrome://extensions` → Developer mode → Load unpacked → select `extension/` folder.
+Extension: `chrome://extensions` → Developer mode → Load unpacked → select `extension/` folder.
 
-The `summarizer/` directory contains an optional Python backend (not needed for normal operation — the extension handles everything).
+Python: `pip install -r requirements.txt` then `python3 -m summarizer` to test.
+
+Cron: `bash scripts/install_cron.sh` to set up 6 AM IST daily digest.
 
 ## Sensitive Files
 
 - `.env` — local secrets (gitignored)
-- `data/` — bookmark data and state (gitignored)
+- `data/` — logs (gitignored)
 - API keys in extension storage are not committed

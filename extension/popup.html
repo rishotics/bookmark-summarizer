@@ -3,7 +3,7 @@
 <head>
   <style>
     body {
-      width: 300px;
+      width: 280px;
       padding: 16px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
@@ -48,15 +48,6 @@
       color: white;
     }
     .btn-primary:hover { background: #1a8cd8; }
-    .btn-primary:disabled {
-      background: #1d4e7a;
-      cursor: not-allowed;
-    }
-    .btn-secondary {
-      background: #273340;
-      color: #e7e9ea;
-    }
-    .btn-secondary:hover { background: #2e3d4d; }
     .btn-danger {
       background: transparent;
       color: #f4212e;
@@ -70,38 +61,12 @@
       margin-top: 8px;
       min-height: 16px;
     }
-    .status.error { color: #f4212e; }
-    .divider {
-      border: none;
-      border-top: 1px solid #2f3336;
-      margin: 12px 0;
-    }
-    .config-section {
-      display: none;
-    }
-    .config-section.visible {
-      display: block;
-    }
-    label {
-      display: block;
-      font-size: 11px;
-      color: #8b98a5;
-      margin-bottom: 4px;
-      margin-top: 8px;
-    }
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #2f3336;
-      border-radius: 8px;
-      background: #273340;
-      color: #e7e9ea;
-      font-size: 12px;
-      box-sizing: border-box;
-    }
-    input:focus {
-      outline: none;
-      border-color: #1d9bf0;
+    .info {
+      font-size: 10px;
+      color: #536471;
+      text-align: center;
+      margin-top: 12px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -111,24 +76,10 @@
   <div class="stat-label">bookmarks captured</div>
   <div class="last-info" id="lastInfo"></div>
 
-  <button class="btn-primary" id="sendBtn">Send Digest Now</button>
-  <button class="btn-secondary" id="configToggle">Settings</button>
-
-  <div class="config-section" id="configSection">
-    <hr class="divider">
-    <label>Anthropic API Key</label>
-    <input type="password" id="apiKey" placeholder="sk-ant-...">
-    <label>Telegram Bot Token</label>
-    <input type="password" id="botToken" placeholder="123456:ABC-DEF...">
-    <label>Telegram Chat ID</label>
-    <input type="text" id="chatId" placeholder="your_chat_id">
-    <br><br>
-    <button class="btn-primary" id="saveConfig">Save Settings</button>
-  </div>
-
-  <hr class="divider">
+  <button class="btn-primary" id="exportBtn">Export Now</button>
   <button class="btn-danger" id="clearBtn">Clear All Bookmarks</button>
   <div class="status" id="status"></div>
+  <div class="info">Digest sent daily at 6 AM IST via Telegram.<br>Keep your bookmarks tab pinned.</div>
   <script src="popup.js"></script>
 </body>
 </html>
