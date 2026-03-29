@@ -16,22 +16,18 @@ from .summarize import pick_related_bookmark, summarize
 
 def run():
     config = load_config()
-
-    # 1. Read exported bookmarks from JSON
-    bookmarks_path = config.bookmarks_path
-    if not bookmarks_path.exists():
-        print(f"No bookmarks file at {bookmarks_path}. Extension hasn't exported yet.")
-        return
-
-    with open(bookmarks_path) as f:
-        raw_bookmarks = json.load(f)
-
-    print(f"Read {len(raw_bookmarks)} bookmarks from {bookmarks_path}")
-
-    # 2. Upsert all into MongoDB
     col = get_collection(config.mongodb_uri)
-    new_count = upsert_bookmarks(col, raw_bookmarks)
-    print(f"Upserted into MongoDB: {new_count} new, {len(raw_bookmarks) - new_count} existing")
+
+    # 1. If local JSON exists, upsert into MongoDB (local dev mode)
+    bookmarks_path = config.bookmarks_path
+    if bookmarks_path and bookmarks_path.exists():
+        with open(bookmarks_path) as f:
+            raw_bookmarks = json.load(f)
+        print(f"Read {len(raw_bookmarks)} bookmarks from {bookmarks_path}")
+        new_count = upsert_bookmarks(col, raw_bookmarks)
+        print(f"Upserted into MongoDB: {new_count} new, {len(raw_bookmarks) - new_count} existing")
+    else:
+        print("No local JSON file — reading directly from MongoDB (EC2 mode)")
 
     # 3. Get unprocessed bookmarks from last 24 hours
     recent = get_unprocessed_last_24h(col)
